@@ -12,8 +12,10 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
 
     private static final long serialVersionUID = 268345258112289218L;
 
+    //默认的初始表长度
     private static final int DEFAULT_SIZE=500;
 
+    //表的最大容量
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 
     private Object[] elements;
@@ -35,7 +37,7 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
 
     /**
      * 创建
-     * @param length 表的最大容量
+     * @param length 自定义表的容量
      */
     public ArrayList(int length){
         if (length<0){
@@ -66,16 +68,6 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
         return current;
     }
 
-    private void rangeCheck(int index){
-        if (index<0){
-            throw new IllegalArgumentException("访问位置不能小于0");
-        }
-    }
-
-    E elementData(int index){
-        return (E)elements[index];
-    }
-
     @Override
     public boolean add(E e) {
 
@@ -89,8 +81,49 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
 
     @Override
     public void add(int index, E element) {
+
+        if (index>current||index<0){
+            throw new IllegalArgumentException();
+        }
         ensureCapacityInternal(current+1);
 
+        System.arraycopy(elements,index,elements,index+1,current-index);
+
+        elements[index]=element;
+
+        current++;
+    }
+
+    @Override
+    public E remove(int index) {
+        rangeCheck(index);
+        E oldElement= (E) elements[index];
+        int moveNum=current-index-1;
+        if (moveNum>0){
+            System.arraycopy(elements,index+1,elements,index,moveNum);
+        }
+        elements[--current]=null;
+        return oldElement;
+
+    }
+
+    private void fastRemove(int index){
+        rangeCheck(index);
+        int moveNum=current-index-1;
+        if (moveNum>0){
+            System.arraycopy(elements,index+1,elements,index,moveNum);
+        }
+        elements[--current]=null;
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        int pos = indexOf(o);
+        if (pos == -1){
+            return false;
+        }
+        fastRemove(pos);
+        return true;
     }
 
     /**
@@ -155,7 +188,19 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
         return current==0;
     }
 
-    void ensureCapacityInternal(int minCapacity){
+    public void clear(){
+        length=DEFAULT_SIZE;
+        elements=new Object[length];
+        current=0;
+    }
+
+
+    @Override
+    public Object[] toArray() {
+        return Arrays.copyOf(elements,current);
+    }
+
+    private void ensureCapacityInternal(int minCapacity){
         if (minCapacity>=length-30){
             grow(minCapacity);
         }
@@ -182,13 +227,13 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
         length=elements.length;
     }
 
-    private static int  hugeCapacity(int minCapacity){
+    private static int hugeCapacity(int minCapacity){
         if (minCapacity<0){
             throw new IllegalArgumentException();
         }
-
         return minCapacity>MAX_ARRAY_SIZE?Integer.MAX_VALUE:MAX_ARRAY_SIZE;
     }
+
 
     @Override
     public String toString() {
@@ -201,6 +246,21 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
         }
         sb.append("]");
         return sb.toString();
+    }
+
+
+
+    private void rangeCheck(int index){
+        if (index<0){
+            throw new IllegalArgumentException("访问位置不能小于0");
+        }
+        if (index>current){
+            throw new IndexOutOfBoundsException("index:"+index+" size:"+current);
+        }
+    }
+
+    private E elementData(int index){
+        return (E)elements[index];
     }
 
 
