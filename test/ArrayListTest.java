@@ -3,6 +3,7 @@ import com.zyinux.structure.list.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.LinkedList;
 
 
 public class ArrayListTest {
