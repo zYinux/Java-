@@ -92,6 +92,8 @@ public class ArrayList<E> extends AbstractList<E> implements Serializable,
         elements[index]=element;
 
         current++;
+
+
     }
 
     @Override
